@@ -31,8 +31,9 @@ public class PointService {
     }
 
     public UserPoint getUserPoint(@PathVariable long id) {
-        log.info("유저 포인트 조회 > 유저 id: {}", id);
-        return userPointTable.selectById(id);
+        UserPoint userPoint = userPointTable.selectById(id);
+        log.info("유저 포인트 조회 > 유저 id: {} 포인트 잔액: {}", id, userPoint.point());
+        return userPoint;
     }
 
     public List<PointHistory> getPointHistories(@PathVariable long id) {
@@ -50,6 +51,7 @@ public class PointService {
         long newPoint = userPoint.point() + amount;
 
         if (newPoint > MAX_POINT_LIMIT) {
+            log.error("충전 최대 한고 초과 > 유저 id: {} 포인트 잔액: {} 충전액: {}", id, userPoint.point(), amount);
             throw new PointLimitExceedException();
         }
 
@@ -68,7 +70,7 @@ public class PointService {
 
         UserPoint userPoint = userPointTable.selectById(id);
         if(userPoint.point() < amount) {
-            log.error("포인트 잔액 부족 > 유저 id: {} 포인트 잔액: {}", id, userPoint);
+            log.error("포인트 잔액 부족 > 유저 id: {} 포인트 잔액: {}", id, userPoint.point());
             throw new InsufficientPointException();
         }
 
